@@ -6,9 +6,7 @@ SECRET_KEY = 'django-insecure-(*)!^pxu!il(10=&04_49sng@xz4uqnkd*ihy9z(b)+bk^hr8t
 
 DEBUG = True
 
-
 ALLOWED_HOSTS = ['*']
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -18,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_yasg',
 
     # apps
     'products',

@@ -1,13 +1,11 @@
-import datetime
-from datetime import timedelta, datetime
-
-from django.db.models import Q
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Product
+from .models import Product, Detail
 from .permission import IsAuthenticatedOrReadOnly2
-from .serializers import ProductSerializer, ProductSerializerForCreate
+from .serializers import ProductSerializer, ProductSerializerForCreate, Detailserializer
 
 
 class ProductAPIView(ListCreateAPIView):
@@ -32,3 +30,16 @@ class ProductUpdateDeleteAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.filter()
     serializer_class = ProductSerializer
     permission_classes = ()
+
+
+class DetailAPIView(APIView):
+    def get(self, request):
+        products = Detail.objects.all()
+        products_data = Detailserializer(products, many=True)
+        return Response(products_data.data)
+
+    def post(self, request):
+        product_data = Detailserializer(data=request.data)
+        product_data.is_valid(raise_exception=True)
+        product_data.save()
+        return Response(status=201)

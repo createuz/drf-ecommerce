@@ -1,10 +1,17 @@
 from django.urls import path
-
-from .views import ProductAPIView, ProductUpdateDeleteAPIView, DetailAPIView
+from .views import ProductListCreateView, ProductUpdateDeleteView, ProductDetailView
 
 urlpatterns = [
-    path('products/', ProductAPIView.as_view(), name='products'),
-    path('product-update-delete/<int:pk>', ProductUpdateDeleteAPIView.as_view(), name='products_update_delete'),
-    path('details/', DetailAPIView.as_view(), name='details'),
-    path('category/', Category.as_view(), name='category'),
+    path('product/', ProductListCreateView.as_view(), name='product-list-create'),
+    path('product-update-delete/<int:pk>', ProductUpdateDeleteView.as_view(), name='products_update_delete'),
+    path('product-detail/<int:pk>', ProductDetailView.as_view(), name='products_detail'),
+
 ]
+from django.urls import path
+from .views import ProductListCreateView, ProductUpdateDeleteView
+#
+# urlpatterns = [
+#     path('product/', ProductListCreateView.as_view(), name='product-list-create'),
+#     path('product/<int:pk>/', ProductUpdateDeleteView.as_view(), name='product-update-delete'),
+#     # path('product/on_sale/', OnSaleProductListView.as_view(), name='on-sale-product-list'),
+# ]

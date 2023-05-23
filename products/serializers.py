@@ -1,29 +1,19 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
+from .models import Product, Comment
 
-from .models import Product, Detail, Category
 
-
-class CategorySerializer(ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Category
-        fields = '__all__'
+        model = Comment
+        fields = ['id', 'user', 'content', 'created_at']
 
 
-class ProductSerializer(ModelSerializer):
-    category = CategorySerializer()
+class ProductSerializer(serializers.ModelSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = Product
-        fields = '__all__'
-
-
-class ProductSerializerForCreate(ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
-
-
-class Detailserializer(ModelSerializer):
-    class Meta:
-        model = Detail
-        fields = '__all__'
+        fields = ['id', 'title', 'price', 'category', 'description', 'color',
+                  'original_price', 'discount', 'main_image', 'image1', 'image2',
+                  'image3', 'image4', 'image5', 'image6', 'image7',
+                  'image8', 'image9', 'image10', 'comments']

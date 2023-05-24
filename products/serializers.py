@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from .models import Product, Comment
+from django.contrib.auth.models import User
+from rest_framework.serializers import ModelSerializer
+from .models import Product, Category, ShoppingCard
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -13,7 +16,36 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'title', 'price', 'category', 'description', 'color',
-                  'original_price', 'discount', 'main_image', 'image1', 'image2',
-                  'image3', 'image4', 'image5', 'image6', 'image7',
-                  'image8', 'image9', 'image10', 'comments']
+        fields = '__all__'
+
+
+class CategorySerializer(ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class ProductSerializerForCreate(ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+
+class ProductSerializerForCard(ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('title', 'price', 'category')
+
+
+class ShoppingCardSerializer(ModelSerializer):
+    class Meta:
+        model = ShoppingCard
+        fields = ('product', 'quantity', 'user', 'date')
+
+
+class ShoppingCardForDetailSerializer(ModelSerializer):
+    product = ProductSerializerForCard()
+
+    class Meta:
+        model = ShoppingCard
+        fields = ('product', 'quantity')

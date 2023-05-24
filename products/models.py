@@ -1,6 +1,5 @@
 from django.db import models
-
-from accounts.models import User
+from django.contrib.auth.models import User
 
 
 class Category(models.Model):
@@ -17,11 +16,9 @@ class Category(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=100)
     price = models.FloatField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    discount_percentage = models.FloatField()
     description = models.TextField()
     color = models.CharField(max_length=100)
-    original_price = models.FloatField()
-    discount = models.FloatField()
     main_image = models.ImageField(upload_to='product_images')
     image1 = models.ImageField(upload_to='product_images', blank=True)
     image2 = models.ImageField(upload_to='product_images', blank=True)
@@ -33,6 +30,11 @@ class Product(models.Model):
     image8 = models.ImageField(upload_to='product_images', blank=True)
     image9 = models.ImageField(upload_to='product_images', blank=True)
     image10 = models.ImageField(upload_to='product_images', blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
+
+    @property
+    def discounted_price(self):
+        return self.price - (self.price * (self.discount_percentage / 100))
 
     def __str__(self):
         return self.title
@@ -48,18 +50,15 @@ class Comment(models.Model):
         return f"Comment by {self.user.username} on {self.product.title}"
 
 
-class Detail(models.Model):
-    sale = models.IntegerField(null=True)
-    title = models.CharField(max_length=100)
-    price = models.FloatField()
-    category = models.CharField(max_length=100, null=True)
-    color = models.CharField(max_length=100)
-    image1 = models.ImageField()
-    image2 = models.ImageField(blank=True, null=True)
-    image3 = models.ImageField(blank=True, null=True)
-    image4 = models.ImageField(blank=True, null=True)
-    image5 = models.ImageField(blank=True, null=True)
-    gos = models.IntegerField()
+class ShoppingCard(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Shopping Card'
+        verbose_name_plural = 'Shopping Cards'
 
     def __str__(self):
-        return self.sale
+        return self.product.title

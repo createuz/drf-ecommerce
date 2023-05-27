@@ -1,14 +1,17 @@
 from rest_framework import serializers
-from .models import Product, Comment
-from django.contrib.auth.models import User
-from rest_framework.serializers import ModelSerializer
-from .models import Product, Category, ShoppingCard
+from .models import Product, Category, Comment, ShoppingCard
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'content', 'created_at']
+        fields = '__all__'
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -19,33 +22,31 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CategorySerializer(ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
-
-
-class ProductSerializerForCreate(ModelSerializer):
+class ProductSerializerForCreate(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
 
 
-class ProductSerializerForCard(ModelSerializer):
+class ProductSerializerForCard(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('title', 'price', 'category')
 
 
-class ShoppingCardSerializer(ModelSerializer):
+class ShoppingCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCard
         fields = ('product', 'quantity', 'user', 'date')
 
 
-class ShoppingCardForDetailSerializer(ModelSerializer):
+class ShoppingCardForDetailSerializer(serializers.ModelSerializer):
     product = ProductSerializerForCard()
 
     class Meta:
         model = ShoppingCard
         fields = ('product', 'quantity')
+
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()

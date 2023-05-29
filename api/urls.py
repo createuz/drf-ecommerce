@@ -1,6 +1,3 @@
-from django.urls import path
-from rest_framework.routers import DefaultRouter
-
 # from .views import ProductAPIView, AddToShoppingCardAPIView, UserShoppingCardAPIView, \
 #     DeleteFromCardAPIView, ProductListCreateView, ProductUpdateDeleteView, ProductDetailView, CommentCreateView, \
 #     SendMail
@@ -72,15 +69,18 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    CategoryViewSet, ProductViewSet, ShoppingCardViewSet, SendMailViewSet
+    CategoryViewSet, ProductViewSet, SendMail, AddToShoppingCardAPIView,
+    UserShoppingCardAPIView, DeleteFromCardAPIView
 )
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
 router.register(r'categories', CategoryViewSet)
-router.register(r'shopping-cards', ShoppingCardViewSet)
-router.register(r'send-mail', SendMailViewSet, basename='send-mail')
 
 urlpatterns = [
+    path('send-email/', SendMail.as_view(), name='send_email'),
+    path('add-to-card', AddToShoppingCardAPIView.as_view(), name='shopping_card'),
+    path('user-card', UserShoppingCardAPIView.as_view(), name='user_card'),
+    path('user-card-delete/<int:pk>', DeleteFromCardAPIView.as_view(), name='user_card_delete'),
     path('', include(router.urls)),
 ]

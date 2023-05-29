@@ -243,11 +243,13 @@
 #     queryset = Category.objects.all()
 #     serializer_class = CategorySerializer
 #     permission_classes = [permissions.IsAuthenticated]
-
-
+from django.db.models import Q
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Product, Category, Comment, ShoppingCard
 from .serializers import (
     ProductSerializer, CategorySerializer, CommentSerializer,
@@ -260,16 +262,21 @@ from .tasks import send_email
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.request.method == 'GET':
+            return ProductSerializer
+        elif self.request.method == 'POST' or \
+                self.request.method == 'PUT' or \
+                self.request.method == 'PATCH':
             return ProductSerializerForCreate
-        return self.serializer_class
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -282,56 +289,60 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(product=product, user=request.user)
-            return Response({'message': 'Comment created successfully.'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'Comment created successfully.'}, status=201)
+        return Response(serializer.errors, status=400)
 
 
-class ShoppingCardViewSet(viewsets.ModelViewSet):
-    queryset = ShoppingCard.objects.all()
-    serializer_class = ShoppingCardSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class SendMail(APIView):
+    permission_classes = ()
 
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return ShoppingCardForDetailSerializer
-        return self.serializer_class
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-    @action(detail=False, methods=['get'])
-    def user_card(self, request):
-        user_products = self.queryset.filter(user=request.user)
-        serializer = self.get_serializer(user_products, many=True)
-        total_price = sum(item['product']['price'] * item['quantity'] for item in serializer.data)
-        data = {
-            'data': serializer.data,
-            'total_price': total_price
-        }
-        return Response(data)
-
-    @action(detail=True, methods=['post'])
-    def remove_from_card(self, request, pk=None):
+    def post(self, request):
         try:
-            shopping_card = self.get_object()
-            if shopping_card.user != request.user:
-                return Response({'message': 'You are not allowed to perform this action.'},
-                                status=status.HTTP_403_FORBIDDEN)
-            shopping_card.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except ShoppingCard.DoesNotExist:
-            return Response({'message': 'Shopping card item not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-
-class SendMailViewSet(viewsets.ViewSet):
-    permission_classes = []
-
-    @action(detail=False, methods=['post'])
-    def send_email(self, request):
-        serializer = EmailSerializer(data=request.data)
-        if serializer.is_valid():
+            serializer = EmailSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             email = serializer.validated_data.get('email')
             message = 'Test message'
             q = send_email.delay(email, message)
-            return Response({'message': 'Email sent successfully.'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success': False, 'message': f'{e}'})
+        return Response({'success': True, 'message': 'Yuborildi'})
+
+
+class AddToShoppingCardAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        request.data._mutable = True
+        request.data['user'] = request.user.id
+        serializer = ShoppingCardSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=201)
+
+
+class UserShoppingCardAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user_products = ShoppingCard.objects.filter(user=request.user)
+        serializer = ShoppingCardForDetailSerializer(user_products, many=True)
+        summ = 0
+        for element in serializer.data:
+            summ += element['product']['price'] * element['quantity']
+        data = {
+            'data': serializer.data,
+            'summ': summ
+        }
+        return Response(data)
+
+
+class DeleteFromCardAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        try:
+            ShoppingCard.objects.get(Q(pk=pk), Q(user=request.user)).delete()
+        except ShoppingCard.DoesNotExist:
+            return Response({'message': 'Bunday mahsulot mavjud emas'})
+        return Response(status=204)

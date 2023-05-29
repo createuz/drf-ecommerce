@@ -1,4 +1,11 @@
 from django.contrib import admin
-from .models import Product, Category
+from .models import Product, Category, ShoppingCard
+from modeltranslation.admin import TranslationAdmin
 
-admin.site.register((Product, Category))
+
+@admin.register(Product)
+class ProductAdmin(TranslationAdmin):
+    pass
+
+
+admin.site.register((Category, ShoppingCard))

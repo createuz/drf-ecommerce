@@ -46,3 +46,5 @@ uritemplate==4.1.1
 urllib3==2.0.2
 vine==5.0.0
 wcwidth==0.2.6
+
+django-modeltranslation~=0.18.9

@@ -77,6 +77,9 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+        indexes = [
+            models.Index(fields=['name'])
+        ]
 
 
 class Product(models.Model):
@@ -98,9 +101,10 @@ class Product(models.Model):
     image10 = models.ImageField(upload_to='product_images', blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
 
-    @property
-    def discounted_price(self):
-        return self.price - (self.price * (self.discount_percentage / 100))
+    class Meta:
+        indexes = [
+            models.Index(fields=['title', 'price'])
+        ]
 
     def __str__(self):
         return self.title

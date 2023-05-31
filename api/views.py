@@ -250,11 +250,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Product, Category, Comment, ShoppingCard
+from .models import Product, Category, Comment, ShoppingCard, ShoppingLike
 from .serializers import (
     ProductSerializer, CategorySerializer, CommentSerializer,
     ProductSerializerForCreate, ShoppingCardSerializer,
-    ShoppingCardForDetailSerializer, EmailSerializer
+    ShoppingCardForDetailSerializer, EmailSerializer, ShoppingLikeSerializer, ShoppingLikeForDetailSerializer
 )
 from .tasks import send_email
 
@@ -301,11 +301,11 @@ class SendMail(APIView):
             serializer = EmailSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             email = serializer.validated_data.get('email')
-            message = 'Test message'
+            message = 'Assalomu Aleykum'
             q = send_email.delay(email, message)
         except Exception as e:
             return Response({'success': False, 'message': f'{e}'})
-        return Response({'success': True, 'message': 'Yuborildi'})
+        return Response({'success': True, 'message': '🟢 Email sent successfully'})
 
 
 class AddToShoppingCardAPIView(APIView):
@@ -344,5 +344,45 @@ class DeleteFromCardAPIView(APIView):
         try:
             ShoppingCard.objects.get(Q(pk=pk), Q(user=request.user)).delete()
         except ShoppingCard.DoesNotExist:
+            return Response({'message': 'Bunday mahsulot mavjud emas'})
+        return Response(status=204)
+
+
+class AddToShoppingLikeAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        request.data._mutable = True
+        request.data['user'] = request.user.id
+        serializer = ShoppingLikeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=201)
+
+
+class UserShoppingLikeAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user_products = ShoppingLike.objects.filter(user=request.user)
+        serializer = ShoppingLikeForDetailSerializer(user_products, many=True)
+        summ = 0
+        for element in serializer.data:
+            summ += element['product']['price'] * element['quantity']
+        data = {
+            'data': serializer.data,
+            'summ': summ
+        }
+        return Response(data)
+
+
+class DeleteFromLikeAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        try:
+            ShoppingLike.objects.get(Q(pk=pk), Q(user=request.user)).delete()
+        except ShoppingLike.DoesNotExist:
             return Response({'message': 'Bunday mahsulot mavjud emas'})
         return Response(status=204)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category, Comment, ShoppingCard
+from .models import Product, Category, Comment, ShoppingCard, ShoppingLike
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -45,6 +45,26 @@ class ShoppingCardForDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShoppingCard
+        fields = ('product', 'quantity')
+
+
+class ProductSerializerForLike(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('title', 'price', 'description', 'category')
+
+
+class ShoppingLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingLike
+        fields = ('product', 'quantity', 'user', 'date')
+
+
+class ShoppingLikeForDetailSerializer(serializers.ModelSerializer):
+    product = ProductSerializerForLike()
+
+    class Meta:
+        model = ShoppingLike
         fields = ('product', 'quantity')
 
 

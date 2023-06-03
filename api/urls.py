@@ -71,7 +71,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CategoryViewSet, ProductViewSet, SendMail, AddToShoppingCardAPIView,
     UserShoppingCardAPIView, DeleteFromCardAPIView, UserShoppingLikeAPIView, DeleteFromLikeAPIView,
-    AddToShoppingLikeAPIView
+    AddToShoppingLikeAPIView, SearchAPIView
 )
 
 router = DefaultRouter()
@@ -100,6 +100,9 @@ urlpatterns = [
     path('user-like', UserShoppingLikeAPIView.as_view(), name='user_like'),
     path('user-like-delete/<int:pk>', DeleteFromLikeAPIView.as_view(), name='user_like_delete'),
     path('', include(router.urls)),
+
+    # Search
+    path('search/', SearchAPIView.as_view(), name='your-model-list'),
 ]
 '''
     GET /products/: Get a list of products.

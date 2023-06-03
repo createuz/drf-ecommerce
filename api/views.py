@@ -244,7 +244,7 @@
 #     serializer_class = CategorySerializer
 #     permission_classes = [permissions.IsAuthenticated]
 from django.db.models import Q
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, generics, filters
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -375,6 +375,20 @@ class UserShoppingLikeAPIView(APIView):
             'summ': summ
         }
         return Response(data)
+
+
+class SearchAPIView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        q = self.request.GET.get('q', None)
+        if q:
+            queryset = queryset.filter(name__iexact=q)
+        return queryset
 
 
 class DeleteFromLikeAPIView(APIView):

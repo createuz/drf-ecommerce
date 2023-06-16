@@ -1,69 +1,3 @@
-# from django.db import models
-# from django.contrib.auth.models import User
-#
-#
-# class Category(models.Model):
-#     name = models.CharField(max_length=100)
-#
-#     def __str__(self):
-#         return self.name
-#
-#     class Meta:
-#         verbose_name = 'Category'
-#         verbose_name_plural = 'Categories'
-#
-#
-# class Product(models.Model):
-#     title = models.CharField(max_length=100)
-#     price = models.FloatField()
-#     discount_percentage = models.FloatField()
-#     description = models.TextField()
-#     color = models.CharField(max_length=100)
-#     main_image = models.ImageField(upload_to='product_images')
-#     image1 = models.ImageField(upload_to='product_images', blank=True)
-#     image2 = models.ImageField(upload_to='product_images', blank=True)
-#     image3 = models.ImageField(upload_to='product_images', blank=True)
-#     image4 = models.ImageField(upload_to='product_images', blank=True)
-#     image5 = models.ImageField(upload_to='product_images', blank=True)
-#     image6 = models.ImageField(upload_to='product_images', blank=True)
-#     image7 = models.ImageField(upload_to='product_images', blank=True)
-#     image8 = models.ImageField(upload_to='product_images', blank=True)
-#     image9 = models.ImageField(upload_to='product_images', blank=True)
-#     image10 = models.ImageField(upload_to='product_images', blank=True)
-#     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='api')
-#
-#     @property
-#     def discounted_price(self):
-#         return self.price - (self.price * (self.discount_percentage / 100))
-#
-#     def __str__(self):
-#         return self.title
-#
-#
-# class Comment(models.Model):
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='comments')
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     content = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#
-#     def __str__(self):
-#         return f"Comment by {self.user.username} on {self.product.title}"
-#
-#
-# class ShoppingCard(models.Model):
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.IntegerField(default=1)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     date = models.DateTimeField(auto_now_add=True)
-#
-#     class Meta:
-#         verbose_name = 'Shopping Card'
-#         verbose_name_plural = 'Shopping Cards'
-#
-#     def __str__(self):
-#         return self.product.title
-
-
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -146,3 +80,23 @@ class ShoppingLike(models.Model):
 
     def __str__(self):
         return self.product.title
+
+
+class Reviews(models.Model):
+    comment = models.TextField()
+    name = models.CharField(max_length=100)
+    email = models.EmailField(null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Blog(models.Model):
+    image = models.ImageField()
+    about = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
+    shop = models.CharField(max_length=100)
+    reviews = models.ForeignKey(Reviews, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.about

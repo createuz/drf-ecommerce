@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Category, Comment, ShoppingCard, ShoppingLike
+from .models import Product, Category, Comment, ShoppingCard, ShoppingLike, Blog
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -70,3 +70,9 @@ class ShoppingLikeForDetailSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class BlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blog
+        fields = '__all__'
